@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Salon Accessories Store - Chairs & More</title>
+<style>
+  /* Reset & base */
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f9fafb; color: #333; }
+
+  /* Navbar */
+  nav {
+    background: #004d40; color: white; padding: 15px 20px; position: sticky; top: 0; z-index: 1000;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  nav .brand {
+    font-weight: 900; font-size: 1.8rem; letter-spacing: 2px; user-select: none;
+  }
+  nav .search-container {
+    flex: 1; margin: 0 15px;
+  }
+  nav .search-container input {
+    width: 100%; padding: 9px 15px; border: none; border-radius: 30px; font-size: 1rem;
+    transition: box-shadow 0.3s ease;
+  }
+  nav .search-container input:focus {
+    outline: none; box-shadow: 0 0 8px #009688;
+  }
+  nav .links {
+    display: flex; gap: 25px; align-items: center;
+  }
+  nav .links a {
+    font-weight: 600; color: white; transition: color 0.3s ease; border-bottom: 2px solid transparent;
+    padding-bottom: 3px; cursor: pointer;
+  }
+  nav .links a:hover {
+    color: #80cbc4; border-bottom: 2px solid #80cbc4;
+  }
+  nav .cart-icon {
+    position: relative; font-size: 1.5rem; cursor: pointer;
+  }
+  nav .cart-count {
+    position: absolute; top: -8px; right: -12px; background: #ff5722; color: white;
+    border-radius: 50%; font-size: 0.8rem; padding: 2px 7px; font-weight: 700;
+  }
+
+  /* Categories */
+  .categories {
+    display: flex; gap: 10px; padding: 12px 20px; background: white; margin-bottom: 20px;
+    overflow-x: auto; border-bottom: 1px solid #ddd;
+  }
+  .categories button {
+    background: #009688; border: none; padding: 8px 14px; color: white; font-weight: 600;
+    border-radius: 25px; transition: background 0.3s ease; white-space: nowrap; cursor: pointer;
+  }
+  .categories button:hover,
+  .categories button.active {
+    background: #26a69a;
+  }
+
+  /* Offers Section */
+  .offers-section {
+    background: #e0f2f1; padding: 25px 20px; margin: 0 20px 25px; border-radius: 10px;
+    box-shadow: 0 3px 15px rgba(0, 0, 0, 0.05);
+  }
+  .offers-section h2 {
+    text-align: center; margin-bottom: 15px; color: #00796b; font-size: 1.6rem; font-weight: 700;
+  }
+  .offers-list {
+    display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;
+  }
+  .offer-card {
+    background: white; padding: 15px 20px; border-radius: 10px; box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    flex: 1 1 280px; max-width: 320px; font-weight: 600; color: #004d40;
+  }
+  .offer-card span {
+    color: #d84315; font-weight: 700;
+  }
+
+  /* Product Grid */
+  .container {
+    display: grid; grid-template-columns: repeat(auto-fill,minmax(220px,1fr));
+    gap: 20px; padding: 0 20px 20px 20px;
+  }
+  .product {
+    background: white; border-radius: 15px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    overflow: hidden; transition: transform 0.25s ease, box-shadow 0.25s ease;
+    display: flex; flex-direction: column;
+  }
+  .product:hover {
+    box-shadow: 0 10px 25px rgba(0,0,0,0.15); transform: translateY(-5px);
+  }
+  .product img {
+    width: 100%; height: 160px; object-fit: cover;
+    border-top-left-radius: 15px; border-top-right-radius: 15px;
+  }
+  .product-info {
+    padding: 15px 18px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between;
+  }
+  .product-info h3 {
+    font-size: 1.2rem; margin-bottom: 8px; color: #004d40;
+  }
+  .price {
+    font-weight: 700; color: #00796b; margin-bottom: 12px; font-size: 1.1rem;
+  }
+  .product-info small {
+    font-size: 0.85rem; color: #555; margin-top: 5px; flex-grow: 1;
+  }
+  .add-btn {
+    background: #009688; color: white; font-weight: 700; padding: 10px 0;
+    border: none; border-radius: 25px; font-size: 1rem; transition: background 0.3s ease; cursor: pointer;
+  }
+  .add-btn:hover {
+    background: #26a69a;
+  }
+
+  /* Sidebar Mini Cart - only total + view button */
+  .mini-cart {
+    position: fixed; right: 10px; top: 40%;
+    background: #004d40; color: white;
+    padding: 12px 16px; border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2); z-index: 1000;
+    user-select: none;
+    text-align: center;
+  }
+  .mini-cart button {
+    background: #ff5722; color: white; border: none; padding: 6px 12px;
+    margin-top: 8px; border-radius: 6px; cursor: pointer; font-weight: 700;
+  }
+  .mini-cart button:hover {
+    background: #e64a19;
+  }
+
+  /* Full Cart Panel - slide in */
+  .cart {
+    position: fixed; top: 0; right: -400px; width: 360px; height: 100vh;
+    background: white; box-shadow: -6px 0 20px rgba(0,0,0,0.15);
+    padding: 20px 24px; overflow-y: auto;
+    transition: right 0.4s ease;
+    z-index: 1100;
+  }
+  .cart.open {
+    right: 0;
+  }
+  .cart h2 {
+    text-align: center; margin-bottom: 25px; font-weight: 900; font-size: 1.5rem; color: #004d40;
+  }
+  #cart-items {
+    list-style: none; padding-left: 0;
+  }
+  #cart-items li {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 600; font-size: 1rem; padding: 10px 0;
+    border-bottom: 1px solid #eee;
+  }
+  #cart-items li span.qty-controls {
+    margin-left: 12px;
+  }
+  .qty-btn {
+    padding: 4px 9px; margin: 0 4px; cursor: pointer; border: none;
+    background: #ddd; border-radius: 6px; font-weight: 800; font-size: 1rem;
+    transition: background 0.25s ease;
+  }
+  .qty-btn:hover {
+    background: #bbb;
+  }
+  .total {
+    font-weight: 900; font-size: 1.4rem; margin-top: 22px;
+    text-align: center; color: #00796b;
+  }
+  .whatsapp-btn {
+    margin-top: 28px; width: 100%; background: #25d366; border: none;
+    color: white; padding: 15px; font-size: 1.1rem;
+    border-radius: 35px; font-weight: 900; cursor: pointer;
+    transition: background 0.3s ease;
+  }
+  .whatsapp-btn:hover {
+    background: #20b658;
+  }
+
+  /* Wholesale Section */
+  .wholesale-section {
+    background: #004d40; color: white; padding: 30px 20px; margin: 30px 20px;
+    border-radius: 12px; box-shadow: 0 3px 16px rgba(0,0,0,0.15);
+    max-width: 1200px; margin-left: auto; margin-right: auto;
+  }
+  .wholesale-section h2 {
+    text-align: center; font-weight: 800; margin-bottom: 15px; font-size: 1.8rem;
+  }
+  .wholesale-section p {
+    max-width: 700px; margin: 0 auto 25px; font-size: 1.1rem; text-align: center;
+  }
+  .wholesale-form {
+    max-width: 500px; margin: 0 auto; display: flex; flex-direction: column; gap: 18px;
+  }
+  .wholesale-form label {
+    font-weight: 600; margin-bottom: 6px;
+  }
+  .wholesale-form input,
+  .wholesale-form textarea {
+    padding: 10px 12px; border-radius: 8px; border: none; font-size: 1rem;
+  }
+  .wholesale-form textarea {
+    resize: vertical; min-height: 90px;
+  }
+  .wholesale-form button {
+    background: #26a69a; color: white; border: none; padding: 12px 0;
+    font-weight: 700; font-size: 1.1rem; border-radius: 30px;
+    transition: background 0.3s ease; cursor: pointer;
+  }
+  .wholesale-form button:hover {
+    background: #009688;
+  }
+
+  /* Footer */
+  footer {
+    background: #263238; color: #cfd8dc; padding: 30px 20px; margin-top: 40px;
+  }
+  .footer-container {
+    display: flex; flex-wrap: wrap; max-width: 1200px; margin-left: auto; margin-right: auto;
+    justify-content: space-between; gap: 25px;
+  }
+  .footer-col {
+    flex: 1 1 220px;
+  }
+  .footer-col h3 {
+    color: #80cbc4; margin-bottom: 15px; font-weight: 700;
+  }
+  .footer-col ul {
+    list-style: none;
+  }
+  .footer-col ul li {
+    margin-bottom: 10px;
+  }
+  .footer-col ul li a {
+    color: #cfd8dc; transition: color 0.3s ease;
+  }
+  .footer-col ul li a:hover {
+    color: #80cbc4;
+  }
+  .footer-contact p {
+    line-height: 1.5; font-size: 0.95rem;
+  }
+  .social-links {
+    margin-top: 10px;
+  }
+  .social-links a {
+    margin-right: 14px; font-size: 1.3rem; color: #80cbc4; transition: color 0.3s ease;
+  }
+  .social-links a:hover {
+    color: #26a69a;
+  }
+
+  /* Responsive */
+  @media (max-width: 900px) {
+    .cart {
+      position: fixed; width: 100%; max-width: none; height: 300px;
+      bottom: 0; right: 0; border-radius: 15px 15px 0 0;
+      box-shadow: 0 -4px 10px rgba(0,0,0,0.15); padding: 15px 20px;
+      overflow-y: auto;
+      transition: none;
+    }
+    .container {
+      grid-template-columns: repeat(auto-fill,minmax(150px,1fr));
+      padding-bottom: 320px; margin-right: 0;
+    }
+  }
+  @media (max-width: 480px) {
+    nav {
+      flex-wrap: wrap; gap: 10px; justify-content: center;
+    }
+    nav .search-container {
+      order: 3; width: 100%; margin: 0;
+    }
+    nav .links {
+      order: 2; width: 100%; justify-content: center; gap: 15px; margin-bottom: -10px;
+    }
+    .categories {
+      padding: 10px 10px; gap: 6px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav>
+  <div class="brand">SalonStore</div>
+  <div class="search-container">
+    <input type="text" id="search" placeholder="Search products..." oninput="filterProducts()" aria-label="Search products" />
+  </div>
+  <div class="links">
+    <a href="#offers-section" tabindex="0">Offers</a>
+    <a href="#wholesale-section" tabindex="0">Wholesale</a>
+    <a href="#" class="cart-icon" onclick="toggleCart()" aria-label="View Cart" tabindex="0">
+      Cart <span class="cart-count" id="cart-count">0</span>
+    </a>
+  </div>
+</nav>
+
+<!-- Categories -->
+<div class="categories" aria-label="Product Categories">
+  <button class="active" onclick="showAll()">All</button>
+  <button onclick="filterCategory('Hair')">Hair Care</button>
+  <button onclick="filterCategory('Face')">Face Care</button>
+  <button onclick="filterCategory('Beard')">Beard Care</button>
+  <button onclick="filterCategory('Body')">Body Care</button>
+  <button onclick="filterCategory('Chair')">Chairs</button>
+  <button onclick="filterCategory('Trimmers')">Trimmers</button>
+</div>
+
+<!-- Offers Section -->
+<section id="offers-section" class="offers-section" aria-label="Current Offers & Deals">
+  <h2>🔥 Hot Offers & Deals</h2>
+  <div class="offers-list">
+    <div class="offer-card">Buy 2 Hair Creams, Get 1 Free! <span>🎁</span></div>
+    <div class="offer-card">Flat 15% OFF on Face Packs <span>🔥</span></div>
+    <div class="offer-card">Free Beard Oil on orders above ₹1000 <span>🎉</span></div>
+    <div class="offer-card">Get ₹100 OFF on first order above ₹800 <span>💥</span></div>
+  </div>
+</section>
+
+<!-- Product Grid -->
+<div class="container" id="product-container" aria-live="polite" aria-label="Product List"></div>
+
+<!-- Sidebar Mini Cart -->
+<div class="mini-cart" aria-label="Cart Total">
+  <b>Total: ₹<span id="mini-total">0</span></b>
+  <br/>
+  <button onclick="toggleCart()" aria-label="View full cart details">View Cart</button>
+</div>
+
+<!-- Slide-in Full Cart Panel -->
+<aside class="cart" id="cart" aria-label="Full Shopping Cart" tabindex="0" role="dialog" aria-modal="true" aria-hidden="true">
+  <h2>Your Cart 🛒</h2>
+  <ul id="cart-items"></ul>
+  <p class="total">Total: ₹<span id="total">0</span></p>
+  <button class="whatsapp-btn" onclick="placeOrder()" aria-label="Place Order on WhatsApp">
+    Place Order on WhatsApp
+  </button>
+</aside>
+
+<!-- Wholesale Section -->
+<section id="wholesale-section" class="wholesale-section" aria-label="Wholesale and Bulk Orders">
+  <h2>Wholesale / Bulk Orders</h2>
+  <p>Are you a salon owner or bulk buyer? Get special pricing and offers for large quantity orders! Fill out the form below to get a custom quote.</p>
+  <form class="wholesale-form" onsubmit="handleWholesaleForm(event)">
+    <label for="wname">Name</label>
+    <input id="wname" type="text" required placeholder="Your Full Name" />
+    <label for="wemail">Email</label>
+    <input id="wemail" type="email" required placeholder="Your Email Address" />
+    <label for="wphone">Phone Number</label>
+    <input id="wphone" type="tel" required placeholder="Your Phone Number" />
+    <label for="wdetails">Order Details</label>
+    <textarea id="wdetails" placeholder="Tell us what products and quantity you want" required></textarea>
+    <button type="submit">Request Quote</button>
+  </form>
+</section>
+
+<!-- Footer -->
+<footer role="contentinfo">
+  <div class="footer-container">
+    <div class="footer-col footer-contact">
+      <h3>Contact Us</h3>
+      <p>📞 +91 88405 42840</p>
+      <p>📧 support@salonstore.com</p>
+      <p>🏢 123 Salon Street, Mumbai, India</p>
+      <div class="social-links" aria-label="Social Media Links">
+        <a href="#" title="Facebook" aria-label="Facebook">🔵</a>
+        <a href="#" title="Instagram" aria-label="Instagram">📸</a>
+        <a href="#" title="Twitter" aria-label="Twitter">🐦</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h3>Quick Links</h3>
+      <ul>
+        <li><a href="#offers-section">Offers</a></li>
+        <li><a href="#wholesale-section">Wholesale</a></li>
+        <li><a href="#cart">Cart</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h3>About SalonStore</h3>
+      <p>A trusted provider of quality salon accessories and creams delivering with care right to your doorstep.</p>
+    </div>
+  </div>
+</footer>
+
+<script>
+const phoneNumber = "918840542840";
+
+const products = [
+  // Existing salon accessories
+  {name:"Hair Cream", price:150, img:"https://via.placeholder.com/300x200?text=Hair+Cream", cat:"Hair"},
+  {name:"Face Pack", price:200, img:"https://via.placeholder.com/300x200?text=Face+Pack", cat:"Face"},
+  {name:"Shampoo", price:120, img:"https://via.placeholder.com/300x200?text=Shampoo", cat:"Hair"},
+  {name:"Conditioner", price:180, img:"https://via.placeholder.com/300x200?text=Conditioner", cat:"Hair"},
+  {name:"Beard Oil", price:250, img:"https://via.placeholder.com/300x200?text=Beard+Oil", cat:"Beard"},
+  {name:"Hair Serum", price:300, img:"https://via.placeholder.com/300x200?text=Hair+Serum", cat:"Hair"},
+  {name:"Gel Wax", price:160, img:"https://via.placeholder.com/300x200?text=Gel+Wax", cat:"Hair"},
+  {name:"Massage Cream", price:220, img:"https://via.placeholder.com/300x200?text=Massage+Cream", cat:"Body"},
+  {name:"Cleanser", price:210, img:"https://via.placeholder.com/300x200?text=Cleanser", cat:"Face"},
+  {name:"Moisturizer", price:190, img:"https://via.placeholder.com/300x200?text=Moisturizer", cat:"Face"},
+
+  // Chairs category realistic products with details
+  {name:"Sakhi Shampoo Chair - City Wash", price:19500, img:"https://images.sakhisalonfurniture.com/city_wash_chair.jpg", cat:"Chair", details:"Synthetic Leather, Size 26x48x32 in, Capacity 170kg, Non rotatable, 3 years warranty."},
+  {name:"Sakhi Styling Chair - Diva Smart", price:22000, img:"https://images.sakhisalonfurniture.com/diva_smart.jpg", cat:"Chair", details:"PU leather, Metal construction, Footrest included, Professional use."},
+  {name:"Sakhi Styling Chair - Lucia", price:25000, img:"https://images.sakhisalonfurniture.com/lucia_chair.jpg", cat:"Chair", details:"Genuine leather, Adjustable headrest, Hydraulic 360 swivel, European design."},
+  {name:"Sakhi Barber Chair - Ambra", price:16500, img:"https://images.sakhisalonfurniture.com/ambra_barber_chair.jpg", cat:"Chair", details:"PU leather, Metal frame, Hydraulic pump, Rotatable, 5 years warranty."},
+  {name:"Sakhi Styling Chair - Blossom", price:26000, img:"https://images.sakhisalonfurniture.com/blossom_styling_chair.jpg", cat:"Chair", details:"Comfortable armrest, Hydraulic lift, Durable chrome base, Contemporary design."},
+
+  // Trimmers category examples
+  {name:"Trimmer Model A", price:2500, img:"t1.jpg", cat:"Trimmers"},
+  {name:"Trimmer Model B", price:3200, img:"t2.jpg", cat:"Trimmers"},
+  {name:"Trimmer Model C", price:2700, img:"t3.jpg", cat:"Trimmers"},
+  {name:"Trimmer Model D", price:3500, img:"t4.jpg", cat:"Trimmers"},
+  {name:"Trimmer Model E", price:2900, img:"https://via.placeholder.com/300x200?text=Trimmer+E", cat:"Trimmers"},
+  {name:"Trimmer Model F", price:3300, img:"https://via.placeholder.com/300x200?text=Trimmer+F", cat:"Trimmers"},
+  {name:"Trimmer Model G", price:3100, img:"https://via.placeholder.com/300x200?text=Trimmer+G", cat:"Trimmers"},
+  {name:"Trimmer Model H", price:2800, img:"https://via.placeholder.com/300x200?text=Trimmer+H", cat:"Trimmers"},
+  {name:"Trimmer Model I", price:2600, img:"https://via.placeholder.com/300x200?text=Trimmer+I", cat:"Trimmers"},
+  {name:"Trimmer Model J", price:3400, img:"https://via.placeholder.com/300x200?text=Trimmer+J", cat:"Trimmers"},
+];
+
+let filteredProducts = [...products];
+let cart = JSON.parse(localStorage.getItem("cart") || "[]");
+
+const productContainer = document.getElementById("product-container");
+const cartItems = document.getElementById("cart-items");
+const cartCount = document.getElementById("cart-count");
+const totalEl = document.getElementById("total");
+const miniTotalEl = document.getElementById("mini-total");
+const categoriesButtons = document.querySelectorAll(".categories button");
+
+function renderProducts() {
+  productContainer.innerHTML = "";
+  filteredProducts.forEach((p, i) => {
+    const desc = p.details ? `<small>${p.details}</small>` : "";
+    const productHTML = `
+      <div class="product" tabindex="0" aria-label="${p.name}, priced at ₹${p.price}">
+        <img src="${p.img}" alt="${p.name}">
+        <div class="product-info">
+          <h3>${p.name}</h3>
+          <p class="price">₹${p.price}</p>
+          ${desc}
+          <button class="add-btn" onclick="addToCart(${i})" aria-label="Add ${p.name} to cart">Add to Cart</button>
+        </div>
+      </div>`;
+    productContainer.insertAdjacentHTML("beforeend", productHTML);
+  });
+}
+
+function filterProducts() {
+  const q = document.getElementById('search').value.toLowerCase();
+  filteredProducts = products.filter(p => p.name.toLowerCase().includes(q));
+  highlightCategory(null);
+  renderProducts();
+}
+
+function filterCategory(cat) {
+  filteredProducts = products.filter(p => p.cat === cat);
+  highlightCategory(cat);
+  renderProducts();
+}
+
+function showAll() {
+  filteredProducts = [...products];
+  highlightCategory(null);
+  renderProducts();
+}
+
+function highlightCategory(cat) {
+  categoriesButtons.forEach(btn => {
+    if (cat === null && btn.textContent === "All") btn.classList.add('active');
+    else if (btn.textContent.includes(cat)) btn.classList.add('active');
+    else btn.classList.remove('active');
+  });
+}
+
+function addToCart(index) {
+  const prod = filteredProducts[index];
+  const found = cart.find(item => item.name === prod.name);
+  if (found) found.qty++;
+  else cart.push({ ...prod, qty: 1 });
+  saveCart();
+  renderCart();
+}
+
+function updateQty(i, change) {
+  cart[i].qty += change;
+  if (cart[i].qty <= 0) cart.splice(i, 1);
+  saveCart();
+  renderCart();
+}
+
+function renderCart() {
+  cartItems.innerHTML = "";
+  let total = 0, count = 0;
+  cart.forEach((item, i) => {
+    total += item.price * item.qty;
+    count += item.qty;
+    cartItems.insertAdjacentHTML("beforeend", `
+      <li aria-label="${item.name} quantity ${item.qty}">
+        ${item.name} - ₹${item.price} x ${item.qty}
+        <span class="qty-controls" role="group" aria-label="Adjust quantity">
+          <button class="qty-btn" onclick="updateQty(${i}, -1)" aria-label="Reduce quantity">-</button>
+          <button class="qty-btn" onclick="updateQty(${i}, 1)" aria-label="Increase quantity">+</button>
+        </span>
+      </li>
+    `);
+  });
+  totalEl.textContent = total;
+  miniTotalEl.textContent = total;
+  cartCount.textContent = count;
+}
+
+function toggleCart() {
+  const cartPanel = document.getElementById("cart");
+  if (cartPanel.classList.contains("open")) {
+    cartPanel.classList.remove("open");
+    cartPanel.setAttribute("aria-hidden", "true");
+  } else {
+    cartPanel.classList.add("open");
+    cartPanel.setAttribute("aria-hidden", "false");
+  }
+}
+
+function placeOrder() {
+  if (cart.length === 0) {
+    alert("Your cart is empty!");
+    return;
+  }
+  let message = "Hello, I want to place an order:%0A";
+  cart.forEach(item => {
+    message += `${item.name} x ${item.qty} = ₹${item.price * item.qty}%0A`;
+  });
+  const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+  message += `Total: ₹${total}%0A`;
+  message += "Delivery Address: ___________%0APhone: ___________";
+  window.open(`https://wa.me/${phoneNumber}?text=${message}`, "_blank");
+}
+
+function saveCart() {
+  localStorage.setItem("cart", JSON.stringify(cart));
+}
+
+function handleWholesaleForm(event) {
+  event.preventDefault();
+  const name = document.getElementById("wname").value.trim();
+  const email = document.getElementById("wemail").value.trim();
+  const phone = document.getElementById("wphone").value.trim();
+  const details = document.getElementById("wdetails").value.trim();
+  if (!name || !email || !phone || !details) {
+    alert("Please fill all fields");
+    return;
+  }
+  alert("Thank you for your interest! We will contact you soon with a custom wholesale quote.\n\n" +
+    `Name: ${name}\nEmail: ${email}\nPhone: ${phone}\nOrder details: ${details}`
+  );
+  event.target.reset();
+}
+
+function scrollToCart() {
+  document.getElementById('cart').scrollIntoView({ behavior: "smooth" });
+}
+
+// Initial render calls
+renderProducts();
+renderCart();
+showAll();
+
+</script>
+
+</body>
+</html>
